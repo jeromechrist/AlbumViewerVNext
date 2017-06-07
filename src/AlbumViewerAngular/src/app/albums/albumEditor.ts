@@ -1,7 +1,7 @@
-import {Component, OnInit, ElementRef} from '@angular/core';
+﻿import {Component, OnInit, ElementRef} from '@angular/core';
 import {Album} from "../business/entities";
 import {AlbumService} from "./albumService";
-import {ActivatedRoute} from "@angular/router";
+import {Router, ActivatedRoute} from "@angular/router";
 import {ErrorInfo} from "../common/errorDisplay";
 import {AppConfiguration} from "../business/appConfiguration";
 import {UserInfo} from "../business/userInfo";
@@ -20,6 +20,7 @@ import {slideInLeft, slideIn} from "../common/animations";
 })
 export class AlbumEditor implements OnInit {
   constructor(private route: ActivatedRoute,
+              private router: Router,
               private albumService: AlbumService,
               private config:AppConfiguration,
               private user:UserInfo) {
@@ -32,7 +33,7 @@ export class AlbumEditor implements OnInit {
 
   ngOnInit() {
     if (!this.user.isAuthenticated) {
-      window.location.href = "#/login";
+      this.router.navigate(['/login']);
       return;
     }
 
@@ -68,7 +69,7 @@ export class AlbumEditor implements OnInit {
           window.document.getElementById("MainView").scrollTop = 0;
 
           setTimeout(function () {
-            window.location.hash = "album/" + album.Id;
+            this.router.navigate(["/album", album.Id]);
           }, 1500)
         },
         err => {
@@ -76,10 +77,9 @@ export class AlbumEditor implements OnInit {
           this.error.error(msg);
           toastr.error(msg);
 
-
           if (err.response && err.response.status == 401) {
             this.user.isAuthenticated = false;
-            window.location.hash = "login";
+            this.router.navigate(["login"]);
           }
         });
 

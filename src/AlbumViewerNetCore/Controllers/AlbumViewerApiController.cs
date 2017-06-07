@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
@@ -29,6 +30,7 @@ namespace AlbumViewerAspNetCore
         AlbumRepository AlbumRepo;
         IConfiguration Configuration;
         private ILogger<AlbumViewerApiController> Logger;
+
         private IHostingEnvironment HostingEnv;
 
         public AlbumViewerApiController(
@@ -61,20 +63,7 @@ namespace AlbumViewerAspNetCore
             throw new InvalidOperationException("This is an unhandled exception");            
         }
 
-        [HttpGet]
-        [Route("api/helloworld")]
-        public object HelloWorld(string name = null)
-        {            
-            if (string.IsNullOrEmpty(name))
-                name = "Johnny Doe";
-            
-            return new
-            {
-                message = $"Hello world {name}",
-                time = DateTime.UtcNow                
-            };
-        }
-
+        
         #region albums
 
         [HttpGet]
@@ -94,16 +83,14 @@ namespace AlbumViewerAspNetCore
         [HttpPost("api/album")]
         public async Task<Album> SaveAlbum([FromBody] Album postedAlbum)
         {
-            //if (!HttpContext.User.Identity.IsAuthenticated)
-            //    throw new ApiException("You have to be logged in to modify data", 401);
+            if (!HttpContext.User.Identity.IsAuthenticated)
+                throw new ApiException("You have to be logged in to modify data", 401);
 
             if (!ModelState.IsValid)
                 throw new ApiException("Model binding failed.", 500);
 
             if (!AlbumRepo.Validate(postedAlbum))
                 throw new ApiException(AlbumRepo.ErrorMessage, 500, AlbumRepo.ValidationErrors);
-
-            postedAlbum.Artist.AmazonUrl = DateTime.Now.ToString();
 
             // this doesn't work for updating the child entities properly
             //if(!await AlbumRepo.SaveAsync(postedAlbum))
@@ -261,6 +248,7 @@ drop table Users;
 
             return true;
         }
+       
         #endregion
     }
 

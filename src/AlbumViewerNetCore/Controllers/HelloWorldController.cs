@@ -19,14 +19,33 @@ namespace AlbumViewerNetCore.Controllers
         }
 
         [HttpGet]
-        [Route("sapi/helloworld")]
+        [Route("api/helloworld")]
         public object HelloWorld(string name = null)
         {
-            //return "Hello " + name + ". Time is: " + DateTime.Now;
             if (string.IsNullOrEmpty(name))
                 name = "Johnny Doe";
 
-            return new { helloMessage = "Hello " + name + ". Time is: " + DateTime.Now };
+	        return new
+	        {
+		        helloMessage = "Hello " + name,
+		        Time = DateTime.Now
+	        };
         }
-    }
+
+
+	    [HttpGet("api/applicationstats")]
+	    public object GetApplicationStats()
+	    {
+		    var stats = new
+		    {
+			    OsPlatform = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
+			    HostName = System.Environment.MachineName,
+			    Ip = HttpContext.Connection.LocalIpAddress.ToString()
+		    };
+
+		    return stats;
+	    }
+
+
+	}
 }
